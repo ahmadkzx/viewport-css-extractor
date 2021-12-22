@@ -1,0 +1,22 @@
+{
+  "name": "viewport-css-extractor",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmadkzx/viewport-css-extractor.git"
+  },
+  "author": "Ahmad Karimzade",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ahmadkzx/viewport-css-extractor/issues"
+  },
+  "homepage": "https://github.com/ahmadkzx/viewport-css-extractor#readme",
+  "dependencies": {
+    "puppeteer": "^13.0.1"
+  }
+}
