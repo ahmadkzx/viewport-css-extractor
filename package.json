@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ahmadkzx/viewport-css-extractor#readme",
   "dependencies": {
+    "axios": "^0.24.0",
     "puppeteer": "^13.0.1"
   }
 }
