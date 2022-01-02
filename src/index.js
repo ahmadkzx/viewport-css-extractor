@@ -23,15 +23,17 @@ function getViewportCss(url, viewportBottom = 1600) {
       /**
        * open virtual browser (chromium)
        */
+      console.log('ℹ️ Loading Page...')
       const browser = await puppeteer.launch()
       const page = await browser.newPage()
       await page.goto(url, { waitUntil: 'networkidle0', timeout: 50000 })
-
+      console.log('✅ Page Loaded')
 
       /**
        * download all css files with axios
        * merge them into one string
        */
+      console.log('\nℹ️ Downloading All CSS Files...')
       let allCssString = ''
       const styleSheetUrls = await page.evaluate(() => {
         const styleSheets = Array.from(document.styleSheets).filter(sheet => !!sheet.href)
@@ -42,6 +44,7 @@ function getViewportCss(url, viewportBottom = 1600) {
       await Promise.all(styleSheetUrls.map(url => axios.get(url))).then(res => {
         allCssString = res.map(res => res.data + ' ')
       })
+      console.log('✅ All CSS Files Downloaded')
 
 
       /**
@@ -50,6 +53,7 @@ function getViewportCss(url, viewportBottom = 1600) {
        * extract viewport css
        * @returns {string} - viewport css string
        */
+      console.log('\nℹ️ Extracting Viewport CSS String...')
       const viewportCssString = await page.evaluate((allCssString, viewportBottom) => {
         let output = ''
 
@@ -73,6 +77,7 @@ function getViewportCss(url, viewportBottom = 1600) {
         return output
 
       }, allCssString, viewportBottom)
+      console.log('✅ Viewport CSS String Extracted\n')
 
       await browser.close()
       resolve(viewportCssString)
