@@ -22,9 +22,9 @@ function getViewportCss() {
     try {
       const browser = await puppeteer.launch()
       const page = await browser.newPage()
-      await page.goto('https://google.com', { waitUntil: 'domcontentloaded', timeout: 20000 })
+      await page.goto('http://127.0.0.1:5500/mock/index.html', { waitUntil: 'domcontentloaded', timeout: 20000 })
   
-      const viewportBottom = 300
+      const viewportBottom = 3000
 
       let allCssString = ''
       const styleSheetUrls = await page.evaluate(() => {
@@ -37,37 +37,32 @@ function getViewportCss() {
         allCssString = res.map(res => res.data + ' ')
       })
 
-      await page.evaluate((allCssString) => {
-        const combinedStylesEl = document.createElement('style')
-        combinedStylesEl.textContent = allCssString
-        document.body.appendChild(combinedStylesEl)
-      }, allCssString)
-  
-      const cssRules = await page.evaluate((viewportBottom) => {
-        let output
-        const styleSheets = Array.from(document.styleSheets)
-        const styleSheet = styleSheets[0]
-        const elements = Array.from(document.getElementsByTagName('*'))
+      const viewportCssString = await page.evaluate((allCssString, viewportBottom) => {
+        let output = ''
 
-        output = elements.map(el => {
-          if (el.offsetTop < viewportBottom) {
-            
-            el.matches = el.matches || el.webkitMatchesSelector || el.mozMatchesSelector || el.msMatchesSelector || el.oMatchesSelector
-            
-            const rules = Array.from(styleSheet.cssRules)
-            return rules.map(rule => {
-              if (el.matches(rule.selectorText)) return rule.cssText
-            }).filter(Boolean)
-          }
+        const elements = Array.from(document.getElementsByTagName('*'))
+        const viewportElements = elements.filter(el => el.offsetTop <= viewportBottom)
+
+        const styleSheet = new CSSStyleSheet()
+        styleSheet.replaceSync(allCssString)
+
+        const allCssRules = Array.from(styleSheet.cssRules)
+
+        viewportElements.map(el => {
+          el.matches = el.matches || el.webkitMatchesSelector || el.mozMatchesSelector || el.msMatchesSelector || el.oMatchesSelector
+
+          allCssRules.map(rule => {
+            if (el.matches(rule.selectorText)) output = `${output} ${rule.cssText}`
+          })
         })
   
         return output
-        
-      }, viewportBottom)
+
+      }, allCssString, viewportBottom)
+
       await browser.close()
 
-      let combinedCssRules = cssRules.join(' ')
-      resolve(combinedCssRules)
+      resolve(viewportCssString)
 
     } catch(err) {
       reject(err)
